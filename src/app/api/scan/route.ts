@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   const { keyword, region, language, days, minViews, maxSubs } = await req.json();
-  const apiKey = process.env.AIzaSyD_kTXAAt1AlDCnw1Tj2-TA8lIULyOTEFE;
+  const apiKey = process.env.YOUTUBE_API_KEY;
 
   if (!apiKey) return NextResponse.json({ error: 'API Key missing' }, { status: 500 });
 
