@@ -3,12 +3,15 @@
 
 import { useState } from 'react';
 import { useStore } from '@/lib/store';
-import { Search, TrendingUp, Brain, Trash2, History, Loader2 } from 'lucide-react';
+import { Search, TrendingUp, Brain, Trash2, History, Loader2, Wrench } from 'lucide-react';
+import ThumbnailAnalyzer from '@/components/ThumbnailAnalyzer';
+import TitleGenerator from '@/components/TitleGenerator';
+import TagRecommender from '@/components/TagRecommender';
+import DurationAnalyzer from '@/components/DurationAnalyzer';
 
 export default function Home() {
   const { activeTab, setActiveTab, saveScanData, scanHistory, clearAllData, videos, snapshots } = useStore();
   
-  // Scanner State
   const [keyword, setKeyword] = useState('');
   const [minViews, setMinViews] = useState(3000);
   const [maxSubs, setMaxSubs] = useState(1000);
@@ -25,9 +28,8 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      
       saveScanData(data.videos, keyword);
-      setActiveTab('scanner'); // Pindah ke tab hasil
+      setActiveTab('scanner');
     } catch (e: any) {
       alert('Error: ' + e.message);
     } finally {
@@ -35,7 +37,6 @@ export default function Home() {
     }
   };
 
-  // Logic untuk Rising & Analyzer (Dihitung di frontend dari store)
   const videoList = Object.values(videos).sort((a, b) => b.score - a.score);
   
   const risingData = Object.values(videos).map(v => {
@@ -48,14 +49,13 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900">
-      {/* SIDEBAR KIRI (Gaya AI Prompt Generator) */}
+      {/* SIDEBAR */}
       <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
           <h1 className="text-xl font-bold flex items-center gap-2">🚀 Viral Scanner</h1>
           <p className="text-xs text-gray-500 mt-1">AI-Powered YouTube Trend Detector</p>
         </div>
 
-        {/* Navigasi Tab */}
         <div className="p-4 space-y-2 border-b border-gray-200">
           <button onClick={() => setActiveTab('scanner')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'scanner' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}>
             <Search size={16} /> Top Opportunities
@@ -66,14 +66,16 @@ export default function Home() {
           <button onClick={() => setActiveTab('analyzer')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'analyzer' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}>
             <Brain size={16} /> Pattern Analyzer
           </button>
+          <button onClick={() => setActiveTab('tools')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'tools' ? 'bg-purple-50 text-purple-600' : 'hover:bg-gray-100'}`}>
+            <Wrench size={16} /> Production Tools ✨
+          </button>
         </div>
 
-        {/* Form Scanner */}
         <div className="p-4 flex-1 overflow-y-auto space-y-4">
           <h3 className="font-semibold text-sm text-gray-700">Scanner Settings</h3>
           <div>
             <label className="text-xs font-medium text-gray-500">Keyword</label>
-            <input value={keyword} onChange={e => setKeyword(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. lofi hip hop" />
+            <input value={keyword} onChange={e => setKeyword(e.target.value)} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. relaxation music" />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -99,7 +101,6 @@ export default function Home() {
             {loading ? 'Scanning...' : 'Scan YouTube'}
           </button>
 
-          {/* Riwayat Scan */}
           <div className="pt-4 border-t border-gray-200">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-sm text-gray-700 flex items-center gap-1"><History size={14} /> History</h3>
@@ -117,7 +118,7 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* AREA UTAMA KANAN */}
+      {/* MAIN AREA */}
       <main className="flex-1 overflow-y-auto p-6">
         {activeTab === 'scanner' && (
           <div>
@@ -188,12 +189,37 @@ export default function Home() {
             <PatternAnalyzer videos={videoList.slice(0, 100)} />
           </div>
         )}
+
+        {/* ⬅️ TAB TOOLS BARU */}
+        {activeTab === 'tools' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-1">️ Production Tools</h2>
+              <p className="text-gray-500 text-sm">Tools untuk produksi konten faceless music channel</p>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border p-5">
+              <ThumbnailAnalyzer />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-5">
+              <TitleGenerator />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-5">
+              <TagRecommender />
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border p-5">
+              <DurationAnalyzer />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
 }
 
-// Komponen Analyzer (Ekstrak agar file tidak terlalu panjang)
 function PatternAnalyzer({ videos }: { videos: any[] }) {
   const stopWords = ['the', 'and', 'for', 'with', 'to', 'of', 'in', 'a', 'is', 'on', 'at', 'by', 'an', 'as'];
   const titleWords: Record<string, number> = {};

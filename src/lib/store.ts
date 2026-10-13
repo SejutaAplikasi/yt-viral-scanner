@@ -15,6 +15,8 @@ export interface VideoData {
   viewsPerDay: number;
   viewsPerSub: number;
   score: number;
+  durationSeconds: number; // ⬅️ BARU
+  thumbnailColors?: string[]; // ⬅️ BARU (hex colors)
 }
 
 export interface Snapshot {
@@ -27,10 +29,11 @@ interface AppState {
   videos: Record<string, VideoData>;
   snapshots: Snapshot[];
   scanHistory: { id: string; keyword: string; date: string; count: number }[];
-  activeTab: 'scanner' | 'rising' | 'analyzer';
+  activeTab: 'scanner' | 'rising' | 'analyzer' | 'tools'; // ⬅️ Tambah 'tools'
   
-  setActiveTab: (tab: 'scanner' | 'rising' | 'analyzer') => void;
+  setActiveTab: (tab: any) => void;
   saveScanData: (videos: VideoData[], keyword: string) => void;
+  updateThumbnailColors: (videoId: string, colors: string[]) => void;
   clearAllData: () => void;
 }
 
@@ -57,9 +60,7 @@ export const useStore = create<AppState>()(
           });
         });
 
-        // Batasi snapshot agar localStorage tidak penuh (simpan max 2000 snapshot terbaru)
         const allSnapshots = [...get().snapshots, ...newSnapshots].slice(-2000);
-        
         const history = {
           id: Date.now().toString(),
           keyword,
@@ -70,14 +71,20 @@ export const useStore = create<AppState>()(
         set({
           videos: updatedVideos,
           snapshots: allSnapshots,
-          scanHistory: [history, ...get().scanHistory].slice(0, 20) // Simpan 20 riwayat terakhir
+          scanHistory: [history, ...get().scanHistory].slice(0, 20)
         });
+      },
+
+      updateThumbnailColors: (videoId, colors) => {
+        const videos = { ...get().videos };
+        if (videos[videoId]) {
+          videos[videoId].thumbnailColors = colors;
+          set({ videos });
+        }
       },
 
       clearAllData: () => set({ videos: {}, snapshots: [], scanHistory: [] }),
     }),
-    {
-      name: 'yt-scanner-storage', // Key di LocalStorage
-    }
+    { name: 'yt-scanner-storage' }
   )
 );

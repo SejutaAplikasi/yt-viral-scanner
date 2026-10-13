@@ -52,20 +52,35 @@ export async function POST(req: Request) {
         const scoreRecency = Math.max(10, 100 - (ageDays * 3));
         const score = (scoreViewsSub * 0.5) + (scoreViewsDay * 0.35) + (scoreRecency * 0.15);
 
-        return {
-          videoId: v.id,
-          channelId: v.snippet.channelId,
-          title: v.snippet.title,
-          thumbnailUrl: v.snippet.thumbnails?.high?.url || '',
-          publishedAt: v.snippet.publishedAt,
-          viewCount: views,
-          channelTitle: ch.title,
-          subscriberCount: ch.subs,
-          tags: v.snippet.tags || [],
-          viewsPerDay,
-          viewsPerSub,
-          score
-        };
+        // src/app/api/scan/route.ts
+// ... (bagian atas sama, hanya tambahkan durationSeconds di return)
+
+// Di bagian processedVideos.map, tambahkan:
+		return {
+		  videoId: v.id,
+		  channelId: v.snippet.channelId,
+		  title: v.snippet.title,
+		  thumbnailUrl: v.snippet.thumbnails?.high?.url || '',
+		  publishedAt: v.snippet.publishedAt,
+		  viewCount: views,
+		  channelTitle: ch.title,
+		  subscriberCount: ch.subs,
+		  tags: v.snippet.tags || [],
+		  viewsPerDay,
+		  viewsPerSub,
+		  score,
+		  durationSeconds: parseDuration(v.contentDetails?.duration || 'PT0S'), // ⬅️ BARU
+		};
+
+		// Tambahkan helper function di atas export POST:
+		function parseDuration(iso: string): number {
+		  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+		  if (!match) return 0;
+		  const h = parseInt(match[1] || '0');
+		  const m = parseInt(match[2] || '0');
+		  const s = parseInt(match[3] || '0');
+		  return h * 3600 + m * 60 + s;
+		}
       })
       .filter(Boolean);
 
