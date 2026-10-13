@@ -1,8 +1,7 @@
 // src/app/page.tsx
 import Link from 'next/link';
-import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, ArrowRight } from 'lucide-react';
+import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, ArrowRight, Lock, CheckCircle } from 'lucide-react';
 
-// 🎯 DATA MANUAL (Hardcoded) - Zero API Calls, Zero Build Errors!
 const trendingVideos = {
   japan: [
     { id: '1', title: 'Relaxing Japanese Music 🎌 Traditional Koto & Shamisen', channel: 'Japan Vibes', views: '125K', days: 3, score: 92, thumb: 'https://img.youtube.com/vi/jfKfPfyJRdk/mqdefault.jpg' },
@@ -12,7 +11,7 @@ const trendingVideos = {
   sleep: [
     { id: '4', title: 'Deep Sleep Music 🌙 8 Hours Delta Waves', channel: 'Sleep Therapy', views: '345K', days: 2, score: 95, thumb: 'https://img.youtube.com/vi/DWcJFNfaw9c/mqdefault.jpg' },
     { id: '5', title: 'Insomnia Relief Music 😴 Fall Asleep Fast', channel: 'Relaxing Music', views: '278K', days: 4, score: 93, thumb: 'https://img.youtube.com/vi/1ZYbU82GVz4/mqdefault.jpg' },
-    { id: '6', title: 'Black Screen Sleep Music 🖤 No Ads', channel: 'Dark Sleep', views: '189K', days: 3, score: 91, thumb: 'https://img.youtube.com/vi/UfcAVejslrU/mqdefault.jpg' },
+    { id: '6', title: 'Black Screen Sleep Music  No Ads', channel: 'Dark Sleep', views: '189K', days: 3, score: 91, thumb: 'https://img.youtube.com/vi/UfcAVejslrU/mqdefault.jpg' },
   ],
   study: [
     { id: '7', title: 'Study Music 📚 Focus & Concentration', channel: 'Study Beats', views: '567K', days: 3, score: 98, thumb: 'https://img.youtube.com/vi/5qap5aO4i9A/mqdefault.jpg' },
@@ -38,101 +37,69 @@ export default function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
                 <Rocket className="text-white" size={20} />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Viral Scanner
-              </span>
+              <span className="font-bold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Viral Scanner</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-600 hover:text-purple-600 transition font-medium">Fitur</a>
-              <a href="#trending" className="text-gray-600 hover:text-purple-600 transition font-medium">Trending</a>
-              <a href="#how-to" className="text-gray-600 hover:text-purple-600 transition font-medium">Cara Pakai</a>
+              <a href="#pricing" className="text-gray-600 hover:text-purple-600 transition font-medium">Harga</a>
             </div>
-            <Link
-              href="/scanner"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition flex items-center gap-2"
-            >
+            <Link href="/scanner" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition flex items-center gap-2">
               Mulai Scan <ArrowRight size={16} />
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - GIMMICK 1: The 1% Gap Finder */}
       <section className="relative overflow-hidden py-20 px-4">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 via-transparent to-pink-100/50"></div>
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         
         <div className="relative max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Sparkles size={16} /> AI-Powered YouTube Trend Detector
+          <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-bold mb-6 border border-red-200">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+            JANGAN BERSAING DENGAN CHANNEL BESAR!
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Temukan Video Viral
-            <br />
+          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight text-gray-900">
+            Berhenti Menebak. <br />
             <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-              Sebelum Trending
+              Mulai Meniru Yang Viral.
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Scan ribuan video YouTube, analisis pattern viral, dan generate konten optimal untuk faceless channel Anda.
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Algoritma YouTube berat sebelah. Tapi ada <strong>"celah tersembunyi"</strong>: Video dari channel kecil (&lt;1.000 subs) yang tiba-tiba meledak dapat 100K+ views. 
+            Kami menemukan topik yang terbukti viral yang dibuat oleh channel seukuran Anda. <strong className="text-purple-700">Jika mereka bisa, Anda pasti bisa.</strong>
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/scanner"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition flex items-center justify-center gap-2"
-            >
-              <Search size={20} /> Mulai Scan Sekarang
+            <Link href="/scanner" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition flex items-center justify-center gap-2">
+              <Search size={20} /> Temukan Celah Viral Sekarang
             </Link>
-            <a
-              href="#trending"
-              className="bg-white border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl font-bold text-lg hover:border-purple-400 transition flex items-center justify-center gap-2"
-            >
-              <TrendingUp size={20} /> Lihat Trending
-            </a>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto">
-            {[
-              { label: 'Videos Scanned', value: '50K+' },
-              { label: 'Accuracy Rate', value: '95%' },
-              { label: 'Active Users', value: '10K+' },
-              { label: 'Real-time Scan', value: '24/7' },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white/80 backdrop-blur rounded-xl p-4 border border-gray-100 shadow-sm">
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  {stat.value}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features - GIMMICK 3: Copy-Paste Blueprint */}
       <section id="features" className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Fitur Unggulan</h2>
-            <p className="text-gray-600 text-lg">Semua yang Anda butuhkan untuk mendominasi YouTube</p>
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">Bukan Sekadar Data, Tapi <span className="text-purple-600">Resep Rahasia</span></h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">Kami tidak hanya memberi Anda video trending. Kami memberi Anda formula untuk menirunya.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: Search, title: 'Smart Scanner', desc: 'Scan ribuan video dengan filter canggih. Temukan video viral dari channel kecil.', color: 'from-purple-500 to-indigo-500' },
-              { icon: Brain, title: 'Pattern Analyzer', desc: 'AI menganalisis pattern judul, tags, dan thumbnail dari video viral.', color: 'from-pink-500 to-rose-500' },
-              { icon: TrendingUp, title: 'Rising Detector', desc: 'Deteksi video yang sedang naik daun sebelum viral.', color: 'from-orange-500 to-red-500' },
-              { icon: Palette, title: 'Thumbnail Analyzer', desc: 'Ekstrak warna dominan dan style thumbnail viral.', color: 'from-blue-500 to-cyan-500' },
-              { icon: Sparkles, title: 'Title Generator', desc: 'Generate judul viral otomatis berdasarkan pattern teratas.', color: 'from-green-500 to-emerald-500' },
-              { icon: Tags, title: 'Tag Recommender', desc: 'Rekomendasi tags optimal berdasarkan performa video viral.', color: 'from-amber-500 to-yellow-500' },
+              { icon: Search, title: 'The 1% Gap Finder', desc: 'Filter otomatis hanya menampilkan video viral dari channel kecil. Abaikan MrBeast, fokus pada celah yang bisa Anda kuasai.', color: 'from-purple-500 to-indigo-500' },
+              { icon: Brain, title: 'Copy-Paste Blueprint', desc: 'Ekstrak kata kunci judul, stack tags SEO, dan palet warna thumbnail dari 100 video teratas. Tinggal salin dan tempel.', color: 'from-pink-500 to-rose-500' },
+              { icon: TrendingUp, title: 'Momentum Sniper', desc: 'Deteksi video yang views-nya melonjak drastis dalam 24 jam terakhir. Jadilah yang pertama menunggangi gelombang sebelum pesaing tahu.', color: 'from-orange-500 to-red-500' },
+              { icon: Palette, title: 'Thumbnail Decoder', desc: 'AI menganalisis warna dominan thumbnail viral. Buat thumbnail dengan psikologi warna yang sama persis.', color: 'from-blue-500 to-cyan-500' },
+              { icon: Sparkles, title: 'Viral Title Generator', desc: 'Generate 10 variasi judul dalam 1 detik berdasarkan pola psikologis yang terbukti memicu klik.', color: 'from-green-500 to-emerald-500' },
+              { icon: Tags, title: 'SEO Tag Stack', desc: 'Dapatkan urutan tags optimal yang dipakai oleh video dengan skor viral tertinggi di niche Anda.', color: 'from-amber-500 to-yellow-500' },
             ].map((feature) => (
               <div key={feature.title} className="group bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition`}>
                   <feature.icon className="text-white" size={24} />
                 </div>
-                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                <h3 className="text-xl font-bold mb-2 text-gray-900">{feature.title}</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{feature.desc}</p>
               </div>
             ))}
@@ -140,147 +107,67 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Trending Videos Section (100% Static Mock Data) */}
-      <section id="trending" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-purple-50">
-        <div className="max-w-7xl mx-auto">
+      {/* Pricing Section - GIMMICK MONETIZATION */}
+      <section id="pricing" className="py-20 px-4 bg-gradient-to-br from-slate-900 to-purple-900 text-white">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <TrendingUp size={16} /> Contoh Data Viral
+            <h2 className="text-4xl font-bold mb-4">Investasi Kecil, Hasil Viral</h2>
+            <p className="text-purple-200 text-lg">Satu video viral bisa menutup biaya langganan seumur hidup.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Free Plan */}
+            <div className="bg-white/5 backdrop-blur rounded-2xl p-8 border border-white/10">
+              <h3 className="text-2xl font-bold mb-2">Starter (Gratis)</h3>
+              <p className="text-purple-200 mb-6">Untuk mencoba-coba</p>
+              <div className="text-4xl font-bold mb-6">Rp 0</div>
+              <ul className="space-y-3 mb-8 text-sm">
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400" /> 3x Scan per hari</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-400" /> Top Opportunities Basic</li>
+                <li className="flex items-center gap-2 text-gray-500"><Lock size={16} /> Rising Now (Momentum)</li>
+                <li className="flex items-center gap-2 text-gray-500"><Lock size={16} /> Title & Tag Generator</li>
+                <li className="flex items-center gap-2 text-gray-500"><Lock size={16} /> Thumbnail Decoder</li>
+              </ul>
+              <Link href="/scanner" className="block w-full text-center bg-white/10 hover:bg-white/20 text-white py-3 rounded-lg font-semibold transition">
+                Coba Gratis
+              </Link>
             </div>
-            <h2 className="text-4xl font-bold mb-4">🔥 Top Viral Videos (7 Hari Terakhir)</h2>
-            <p className="text-gray-600 text-lg">Contoh video trending dengan views tertinggi di berbagai kategori</p>
-          </div>
 
-          <div className="space-y-12">
-            {categories.map((cat) => {
-              const videos = trendingVideos[cat.id as keyof typeof trendingVideos];
-              return (
-                <div key={cat.id}>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${cat.color} rounded-xl flex items-center justify-center text-2xl`}>
-                      {cat.label.split(' ')[0]}
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold">{cat.label}</h3>
-                      <p className="text-sm text-gray-500">Keyword: "{cat.keyword}"</p>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-5">
-                    {videos.map((video, idx) => (
-                      <a
-                        key={video.id}
-                        href={`https://youtube.com/watch?v=${video.thumb.split('/')[4]}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
-                      >
-                        <div className="relative overflow-hidden">
-                          <img
-                            src={video.thumb}
-                            alt={video.title}
-                            className="w-full h-44 object-cover group-hover:scale-110 transition duration-500"
-                          />
-                          <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                            Score: {video.score}
-                          </div>
-                          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur text-white px-2 py-1 rounded text-xs font-medium">
-                            {video.views} views
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <h4 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-purple-600 transition">
-                            {video.title}
-                          </h4>
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span className="truncate">{video.channel}</span>
-                            <span className="flex items-center gap-1">
-                              <Clock size={10} /> {video.days}d ago
-                            </span>
-                          </div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link
-              href="/scanner"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition"
-            >
-              <Search size={20} /> Scan Lebih Banyak Kategori <ArrowRight size={20} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* How to Use Section */}
-      <section id="how-to" className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Cara Pakai</h2>
-            <p className="text-gray-600 text-lg">4 langkah mudah untuk menemukan video viral</p>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { num: '01', title: 'Pilih Keyword', desc: 'Masukkan niche Anda (contoh: "relaxing japan music")', icon: Search },
-              { num: '02', title: 'Scan YouTube', desc: 'AI scan ribuan video & hitung Opportunity Score', icon: Rocket },
-              { num: '03', title: 'Analisis Pattern', desc: 'Lihat pattern judul, tags, thumbnail viral', icon: Brain },
-              { num: '04', title: 'Generate & Publish', desc: 'Buat konten optimal & upload ke YouTube', icon: Sparkles },
-            ].map((step) => (
-              <div key={step.num} className="relative">
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100 h-full">
-                  <div className="text-5xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-3">
-                    {step.num}
-                  </div>
-                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-3 shadow-sm">
-                    <step.icon className="text-purple-600" size={24} />
-                  </div>
-                  <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-                  <p className="text-sm text-gray-600">{step.desc}</p>
-                </div>
+            {/* Premium Plan */}
+            <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-8 border-2 border-white/20 relative transform md:scale-105 shadow-2xl">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-4 py-1 rounded-full text-xs font-black">
+                PALING LARIS
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-3xl p-12 text-center text-white shadow-2xl relative overflow-hidden">
-          <div className="relative">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Siap Mendominasi YouTube?</h2>
-            <p className="text-xl mb-8 text-white/90">
-              Bergabung dengan 10,000+ creator yang sudah menggunakan Viral Scanner
-            </p>
-            <Link
-              href="/scanner"
-              className="inline-flex items-center gap-2 bg-white text-purple-600 px-10 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition"
-            >
-              Mulai Gratis Sekarang <ArrowRight size={20} />
-            </Link>
-            <p className="mt-4 text-sm text-white/70">100% Free • No Credit Card Required</p>
+              <h3 className="text-2xl font-bold mb-2">Premium Access</h3>
+              <p className="text-purple-100 mb-6">Untuk serius cuan dari YouTube</p>
+              <div className="text-4xl font-bold mb-2">Rp 99.000 <span className="text-lg font-normal text-purple-200">/ lifetime</span></div>
+              <p className="text-xs text-purple-200 mb-6">Bayar sekali, pakai selamanya</p>
+              <ul className="space-y-3 mb-8 text-sm">
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>Unlimited</strong> Scan Harian</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>Rising Now</strong> (Deteksi 24 Jam)</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>Viral Title Generator</strong></li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>SEO Tag Recommender</strong></li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>Thumbnail Color Decoder</strong></li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> Prioritas Support</li>
+              </ul>
+              <a href="https://lynk.id/username-anda" target="_blank" className="block w-full text-center bg-white text-purple-600 py-3 rounded-lg font-bold hover:scale-105 transition shadow-lg">
+                Beli Kode di Lynk.id
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <Rocket className="text-white" size={16} />
-              </div>
-              <span className="font-bold">Viral Scanner</span>
+      <footer className="bg-gray-900 text-white py-8 px-4 border-t border-gray-800">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+              <Rocket className="text-white" size={16} />
             </div>
-            <p className="text-gray-400 text-sm">© 2026 Viral Scanner. AI-Powered YouTube Trend Detector.</p>
+            <span className="font-bold">Viral Scanner</span>
           </div>
+          <p className="text-gray-400 text-sm">© 2026 Viral Scanner. Stop guessing, start copying what works.</p>
         </div>
       </footer>
     </div>
