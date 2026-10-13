@@ -1,44 +1,40 @@
 // src/app/page.tsx
+
+// ⚠️ PENTING: 4 Baris ini HARUS ada di paling atas file untuk mematikan static build
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import Link from 'next/link';
 import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, ArrowRight } from 'lucide-react';
-
-// ⬇️ PENTING: Paksa halaman ini untuk selalu render di server (tidak di-build time)
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 const categories = [
   { id: 'japan', keyword: 'relaxing japan music', label: '🎌 Relaxing Japan Music', color: 'from-pink-500 to-rose-500' },
   { id: 'sleep', keyword: 'deep sleep music 8 hours', label: '😴 Sleep Music', color: 'from-indigo-500 to-purple-500' },
-  { id: 'study', keyword: 'lofi study music focus', label: ' Study/Focus', color: 'from-amber-500 to-orange-500' },
+  { id: 'study', keyword: 'lofi study music focus', label: '📚 Study/Focus', color: 'from-amber-500 to-orange-500' },
 ];
 
 async function getTrendingVideos(keyword: string) {
   try {
     const apiKey = process.env.YOUTUBE_API_KEY;
-    
-    // ⬇️ Jika API key tidak ada, return empty array (JANGAN throw error!)
     if (!apiKey) {
-      console.warn('⚠️ YOUTUBE_API_KEY tidak ditemukan. Skipping trending fetch.');
+      console.warn('⚠️ YOUTUBE_API_KEY tidak ditemukan');
       return [];
     }
 
-    const publishedAfter = new Date(Date.now() - 7 * 86400000).toISOString();
+    // Gunakan new Date() alih-alih Date.now() untuk menghindari Next.js build error
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const publishedAfter = sevenDaysAgo.toISOString();
     
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(keyword)}&type=video&order=viewCount&maxResults=9&publishedAfter=${publishedAfter}&relevanceLanguage=en&key=${apiKey}`,
-      { 
-        next: { revalidate: 3600 },
-        cache: 'no-store' // ⬅️ Jangan cache saat build
-      }
+      { cache: 'no-store' }
     );
 
-    if (!searchRes.ok) {
-      console.warn(`⚠️ YouTube API error: ${searchRes.status}`);
-      return [];
-    }
-
+    if (!searchRes.ok) return [];
     const searchData = await searchRes.json();
-
     if (!searchData.items || searchData.items.length === 0) return [];
 
     const videoIds = searchData.items.map((i: any) => i.id.videoId).join(',');
@@ -48,7 +44,6 @@ async function getTrendingVideos(keyword: string) {
     );
 
     if (!videosRes.ok) return [];
-
     const videosData = await videosRes.json();
 
     const statsMap: Record<string, any> = {};
@@ -67,8 +62,7 @@ async function getTrendingVideos(keyword: string) {
       }))
       .sort((a: any, b: any) => b.viewCount - a.viewCount);
   } catch (error) {
-    // ️ TANGKAP SEMUA ERROR - jangan biarkan build crash
-    console.error('❌ Error fetching trending videos:', error);
+    console.error('❌ Error fetching trending:', error);
     return [];
   }
 }
@@ -85,7 +79,6 @@ function daysAgo(dateStr: string): number {
 }
 
 export default async function LandingPage() {
-  // Fetch semua kategori secara paralel
   const [japanVideos, sleepVideos, studyVideos] = await Promise.all([
     getTrendingVideos(categories[0].keyword),
     getTrendingVideos(categories[1].keyword),
@@ -162,7 +155,6 @@ export default async function LandingPage() {
             </a>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto">
             {[
               { label: 'Videos Scanned', value: '50K+' },
@@ -239,7 +231,7 @@ export default async function LandingPage() {
                   {videos.length === 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
                       <p className="text-yellow-700 text-sm">
-                        ⚠️ Belum ada data trending. Pastikan <code className="bg-yellow-100 px-1 rounded">YOUTUBE_API_KEY</code> sudah diset di Vercel Environment Variables.
+                        ⚠️ Belum ada data trending. Pastikan <code className="bg-yellow-100 px-1 rounded">YOUTUBE_API_KEY</code> sudah diset di Vercel.
                       </p>
                     </div>
                   ) : (
@@ -325,27 +317,6 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
-
-          {/* Workflow */}
-          <div className="mt-16 bg-gradient-to-r from-purple-50 to-pink-50 rounded-3xl p-8 border border-purple-100">
-            <h3 className="text-2xl font-bold mb-6 text-center">🎯 Workflow Faceless Music Channel</h3>
-            <div className="grid md:grid-cols-5 gap-3 items-center">
-              {[
-                { icon: Search, label: 'Riset Viral', color: 'text-purple-600' },
-                { icon: Brain, label: 'Analisis', color: 'text-pink-600' },
-                { icon: Sparkles, label: 'Generate', color: 'text-orange-600' },
-                { icon: Palette, label: 'Produksi', color: 'text-blue-600' },
-                { icon: Rocket, label: 'Upload', color: 'text-green-600' },
-              ].map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center mb-2">
-                    <item.icon className={item.color} size={28} />
-                  </div>
-                  <p className="text-sm font-semibold">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
@@ -378,9 +349,7 @@ export default async function LandingPage() {
               </div>
               <span className="font-bold">Viral Scanner</span>
             </div>
-            <p className="text-gray-400 text-sm">
-              © 2026 Viral Scanner. AI-Powered YouTube Trend Detector.
-            </p>
+            <p className="text-gray-400 text-sm">© 2026 Viral Scanner. AI-Powered YouTube Trend Detector.</p>
           </div>
         </div>
       </footer>
