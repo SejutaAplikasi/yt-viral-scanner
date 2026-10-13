@@ -1,34 +1,54 @@
 // src/app/page.tsx
 import Link from 'next/link';
-import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, CheckCircle, ArrowRight } from 'lucide-react';
+import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, ArrowRight } from 'lucide-react';
 
-// Data kategori untuk landing page
+// ⬇️ PENTING: Paksa halaman ini untuk selalu render di server (tidak di-build time)
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const categories = [
   { id: 'japan', keyword: 'relaxing japan music', label: '🎌 Relaxing Japan Music', color: 'from-pink-500 to-rose-500' },
-  { id: 'sleep', keyword: 'deep sleep music 8 hours', label: ' Sleep Music', color: 'from-indigo-500 to-purple-500' },
-  { id: 'study', keyword: 'lofi study music focus', label: '📚 Study/Focus', color: 'from-amber-500 to-orange-500' },
+  { id: 'sleep', keyword: 'deep sleep music 8 hours', label: '😴 Sleep Music', color: 'from-indigo-500 to-purple-500' },
+  { id: 'study', keyword: 'lofi study music focus', label: ' Study/Focus', color: 'from-amber-500 to-orange-500' },
 ];
 
-// Server Component untuk fetch trending videos
 async function getTrendingVideos(keyword: string) {
   try {
     const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) return [];
+    
+    // ⬇️ Jika API key tidak ada, return empty array (JANGAN throw error!)
+    if (!apiKey) {
+      console.warn('⚠️ YOUTUBE_API_KEY tidak ditemukan. Skipping trending fetch.');
+      return [];
+    }
 
     const publishedAfter = new Date(Date.now() - 7 * 86400000).toISOString();
+    
     const searchRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(keyword)}&type=video&order=viewCount&maxResults=9&publishedAfter=${publishedAfter}&relevanceLanguage=en&key=${apiKey}`,
-      { next: { revalidate: 3600 } } // Cache 1 jam
+      { 
+        next: { revalidate: 3600 },
+        cache: 'no-store' // ⬅️ Jangan cache saat build
+      }
     );
+
+    if (!searchRes.ok) {
+      console.warn(`⚠️ YouTube API error: ${searchRes.status}`);
+      return [];
+    }
+
     const searchData = await searchRes.json();
 
-    if (!searchData.items) return [];
+    if (!searchData.items || searchData.items.length === 0) return [];
 
     const videoIds = searchData.items.map((i: any) => i.id.videoId).join(',');
     const videosRes = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${apiKey}`,
-      { next: { revalidate: 3600 } }
+      { cache: 'no-store' }
     );
+
+    if (!videosRes.ok) return [];
+
     const videosData = await videosRes.json();
 
     const statsMap: Record<string, any> = {};
@@ -36,16 +56,19 @@ async function getTrendingVideos(keyword: string) {
       statsMap[v.id] = parseInt(v.statistics.viewCount || '0');
     });
 
-    return searchData.items.map((item: any) => ({
-      videoId: item.id.videoId,
-      title: item.snippet.title,
-      thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
-      channelTitle: item.snippet.channelTitle,
-      publishedAt: item.snippet.publishedAt,
-      viewCount: statsMap[item.id.videoId] || 0,
-    })).sort((a: any, b: any) => b.viewCount - a.viewCount);
+    return searchData.items
+      .map((item: any) => ({
+        videoId: item.id.videoId,
+        title: item.snippet.title,
+        thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+        channelTitle: item.snippet.channelTitle,
+        publishedAt: item.snippet.publishedAt,
+        viewCount: statsMap[item.id.videoId] || 0,
+      }))
+      .sort((a: any, b: any) => b.viewCount - a.viewCount);
   } catch (error) {
-    console.error('Error fetching trending:', error);
+    // ️ TANGKAP SEMUA ERROR - jangan biarkan build crash
+    console.error('❌ Error fetching trending videos:', error);
     return [];
   }
 }
@@ -58,11 +81,11 @@ function formatViews(views: number): string {
 
 function daysAgo(dateStr: string): number {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
-  return days;
+  return Math.max(0, days);
 }
 
 export default async function LandingPage() {
-  // Fetch data untuk semua kategori secara paralel
+  // Fetch semua kategori secara paralel
   const [japanVideos, sleepVideos, studyVideos] = await Promise.all([
     getTrendingVideos(categories[0].keyword),
     getTrendingVideos(categories[1].keyword),
@@ -215,7 +238,9 @@ export default async function LandingPage() {
 
                   {videos.length === 0 ? (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-                      <p className="text-yellow-700">⚠️ Belum ada data. Pastikan YOUTUBE_API_KEY sudah diset di Vercel.</p>
+                      <p className="text-yellow-700 text-sm">
+                        ⚠️ Belum ada data trending. Pastikan <code className="bg-yellow-100 px-1 rounded">YOUTUBE_API_KEY</code> sudah diset di Vercel Environment Variables.
+                      </p>
                     </div>
                   ) : (
                     <div className="grid md:grid-cols-3 gap-5">
@@ -327,7 +352,6 @@ export default async function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-3xl p-12 text-center text-white shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjEiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
           <div className="relative">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Siap Mendominasi YouTube?</h2>
             <p className="text-xl mb-8 text-white/90">
