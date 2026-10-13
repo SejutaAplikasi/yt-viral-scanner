@@ -1,25 +1,47 @@
-// src/app/page.tsx
+// src/app/scanner/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useStore } from '@/lib/store';
-import { Search, TrendingUp, Brain, Trash2, History, Loader2, Wrench } from 'lucide-react';
+import { Search, TrendingUp, Brain, Trash2, History, Loader2, Wrench, ArrowLeft, Lock, Sparkles, Crown } from 'lucide-react';
+import PremiumModal from '@/components/PremiumModal';
 import ThumbnailAnalyzer from '@/components/ThumbnailAnalyzer';
 import TitleGenerator from '@/components/TitleGenerator';
 import TagRecommender from '@/components/TagRecommender';
 import DurationAnalyzer from '@/components/DurationAnalyzer';
 
-export default function Home() {
-  const { activeTab, setActiveTab, saveScanData, scanHistory, clearAllData, videos, snapshots } = useStore();
+export default function ScannerPage() {
+  const { activeTab, setActiveTab, saveScanData, scanHistory, clearAllData, videos, snapshots, isPremium, setPremium, scanCount } = useStore();
   
   const [keyword, setKeyword] = useState('');
   const [minViews, setMinViews] = useState(3000);
   const [maxSubs, setMaxSubs] = useState(1000);
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // Cek status premium dari cookie saat pertama kali load
+  useEffect(() => {
+    fetch('/api/license')
+      .then(res => res.json())
+      .then(data => {
+        if (data.isPremium && !isPremium) {
+          setPremium(true);
+        }
+      });
+  }, []);
 
   const handleScan = async () => {
     if (!keyword) return alert('Masukkan keyword!');
+    
+    // Batasan Free User: Max 3 scan per hari
+    if (!isPremium && scanCount >= 3) {
+      alert('Batas scan harian untuk user gratis sudah habis (3/3). Upgrade ke Premium untuk unlimited scan!');
+      setShowPremiumModal(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/scan', {
@@ -47,27 +69,75 @@ export default function Home() {
     return { ...v, gained, hours, velocity: gained / Math.max(1, hours) };
   }).filter(Boolean).sort((a, b) => (b as any).gained - (a as any).gained);
 
+  // Komponen Overlay untuk fitur yang dikunci
+  const LockedOverlay = ({ title, desc }: { title: string, desc: string }) => (
+    <div className="absolute inset-0 bg-white/60 backdrop-blur-md flex flex-col items-center justify-center z-10 rounded-xl border border-gray-200">
+      <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-4 rounded-full mb-4 shadow-lg">
+        <Lock className="text-white" size={32} />
+      </div>
+      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
+      <p className="text-gray-600 text-sm mb-4 text-center max-w-xs">{desc}</p>
+      <button 
+        onClick={() => setShowPremiumModal(true)}
+        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg font-semibold hover:scale-105 transition flex items-center gap-2"
+      >
+        <Crown size={16} /> Unlock Premium
+      </button>
+    </div>
+  );
+
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900">
+      <PremiumModal 
+        isOpen={showPremiumModal} 
+        onClose={() => setShowPremiumModal(false)} 
+        onSuccess={() => setPremium(true)} 
+      />
+
       {/* SIDEBAR */}
       <aside className="w-80 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <h1 className="text-xl font-bold flex items-center gap-2">🚀 Viral Scanner</h1>
-          <p className="text-xs text-gray-500 mt-1">AI-Powered YouTube Trend Detector</p>
+          <Link href="/" className="flex items-center gap-2 mb-2 text-gray-600 hover:text-purple-600 transition">
+            <ArrowLeft size={16} /> <span className="text-sm">Kembali ke Home</span>
+          </Link>
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-bold flex items-center gap-2"> Viral Scanner</h1>
+            {isPremium && (
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[10px] font-black px-2 py-1 rounded-full flex items-center gap-1">
+                <Crown size={10} /> PRO
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            {isPremium ? 'Unlimited Access' : `Free Plan (${3 - scanCount} scan left today)`}
+          </p>
         </div>
 
         <div className="p-4 space-y-2 border-b border-gray-200">
           <button onClick={() => setActiveTab('scanner')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'scanner' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}>
             <Search size={16} /> Top Opportunities
           </button>
-          <button onClick={() => setActiveTab('rising')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'rising' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}>
+          
+          {/* Rising Now - PREMIUM ONLY */}
+          <button 
+            onClick={() => isPremium ? setActiveTab('rising') : setShowPremiumModal(true)}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium relative ${activeTab === 'rising' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}
+          >
             <TrendingUp size={16} /> Rising Now
+            {!isPremium && <Lock size={12} className="ml-auto text-gray-400" />}
           </button>
+
           <button onClick={() => setActiveTab('analyzer')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'analyzer' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'}`}>
             <Brain size={16} /> Pattern Analyzer
           </button>
-          <button onClick={() => setActiveTab('tools')} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${activeTab === 'tools' ? 'bg-purple-50 text-purple-600' : 'hover:bg-gray-100'}`}>
-            <Wrench size={16} /> Production Tools ✨
+          
+          {/* Tools - PREMIUM ONLY */}
+          <button 
+            onClick={() => isPremium ? setActiveTab('tools') : setShowPremiumModal(true)}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium relative ${activeTab === 'tools' ? 'bg-purple-50 text-purple-600' : 'hover:bg-gray-100'}`}
+          >
+            <Wrench size={16} /> Production Tools
+            {!isPremium && <Lock size={12} className="ml-auto text-gray-400" />}
           </button>
         </div>
 
@@ -119,7 +189,7 @@ export default function Home() {
       </aside>
 
       {/* MAIN AREA */}
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto p-6 relative">
         {activeTab === 'scanner' && (
           <div>
             <h2 className="text-2xl font-bold mb-4">🔥 Top Viral Opportunities</h2>
@@ -135,7 +205,9 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                  {videoList.slice(0, 50).map(v => (
+                  {videoList.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-8 text-gray-500">Belum ada data. Silakan scan terlebih dahulu.</td></tr>
+                  ) : videoList.slice(0, 50).map(v => (
                     <tr key={v.videoId} className="border-t hover:bg-gray-50">
                       <td className="p-3 flex items-center gap-3">
                         <img src={v.thumbnailUrl} className="w-20 h-12 object-cover rounded" alt="" />
@@ -158,27 +230,36 @@ export default function Home() {
         )}
 
         {activeTab === 'rising' && (
-          <div>
-            <h2 className="text-2xl font-bold mb-4">🚀 Rising Now (Momentum)</h2>
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-left">
-                  <tr>
-                    <th className="p-3">Video</th>
-                    <th className="p-3 text-center">Views Gained</th>
-                    <th className="p-3 text-center">Velocity (V/Hour)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(risingData as any[]).slice(0, 30).map(v => (
-                    <tr key={v.videoId} className="border-t">
-                      <td className="p-3 font-medium">{v.title}</td>
-                      <td className="p-3 text-center text-red-500 font-bold">+{v.gained.toLocaleString()}</td>
-                      <td className="p-3 text-center text-green-600 font-bold">{v.velocity.toFixed(1)} / hr</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="relative">
+            {!isPremium && <LockedOverlay title="Rising Now is Premium" desc="Lihat video yang sedang melonjak views-nya dalam 24 jam terakhir. Jadilah yang pertama menunggangi gelombang!" />}
+            <div className={isPremium ? '' : 'opacity-20 pointer-events-none'}>
+              <h2 className="text-2xl font-bold mb-4">🚀 Rising Now (Momentum)</h2>
+              {risingData.length === 0 ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
+                  <p className="text-yellow-700">Belum ada data momentum. Lakukan scan ulang pada keyword yang sama setelah beberapa jam.</p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-left">
+                      <tr>
+                        <th className="p-3">Video</th>
+                        <th className="p-3 text-center">Views Gained</th>
+                        <th className="p-3 text-center">Velocity (V/Hour)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(risingData as any[]).slice(0, 30).map(v => (
+                        <tr key={v.videoId} className="border-t">
+                          <td className="p-3 font-medium">{v.title}</td>
+                          <td className="p-3 text-center text-red-500 font-bold">+{v.gained.toLocaleString()}</td>
+                          <td className="p-3 text-center text-green-600 font-bold">{v.velocity.toFixed(1)} / hr</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -190,28 +271,18 @@ export default function Home() {
           </div>
         )}
 
-        {/* ⬅️ TAB TOOLS BARU */}
         {activeTab === 'tools' && (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-1">️ Production Tools</h2>
-              <p className="text-gray-500 text-sm">Tools untuk produksi konten faceless music channel</p>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border p-5">
-              <ThumbnailAnalyzer />
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border p-5">
-              <TitleGenerator />
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border p-5">
-              <TagRecommender />
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border p-5">
-              <DurationAnalyzer />
+          <div className="relative space-y-6">
+            {!isPremium && <LockedOverlay title="Production Tools is Premium" desc="Akses Title Generator, Tag Recommender, dan Thumbnail Analyzer untuk membuat konten viral secara instan." />}
+            <div className={isPremium ? '' : 'opacity-20 pointer-events-none'}>
+              <div>
+                <h2 className="text-2xl font-bold mb-1 flex items-center gap-2">🛠️ Production Tools <Sparkles className="text-yellow-500" size={20} /></h2>
+                <p className="text-gray-500 text-sm">Tools untuk produksi konten faceless music channel</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border p-5"><ThumbnailAnalyzer /></div>
+              <div className="bg-white rounded-xl shadow-sm border p-5"><TitleGenerator /></div>
+              <div className="bg-white rounded-xl shadow-sm border p-5"><TagRecommender /></div>
+              <div className="bg-white rounded-xl shadow-sm border p-5"><DurationAnalyzer /></div>
             </div>
           </div>
         )}
