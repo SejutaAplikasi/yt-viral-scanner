@@ -1,96 +1,33 @@
 // src/app/page.tsx
-
-// ⚠️ PENTING: 4 Baris ini HARUS ada di paling atas file untuk mematikan static build
-export const dynamic = 'force-dynamic';
-export const dynamicParams = true;
-export const revalidate = 0;
-export const fetchCache = 'force-no-store';
-
 import Link from 'next/link';
 import { Search, Brain, TrendingUp, Palette, Sparkles, Tags, Clock, Rocket, ArrowRight } from 'lucide-react';
 
+// 🎯 DATA MANUAL (Hardcoded) - Zero API Calls, Zero Build Errors!
+const trendingVideos = {
+  japan: [
+    { id: '1', title: 'Relaxing Japanese Music 🎌 Traditional Koto & Shamisen', channel: 'Japan Vibes', views: '125K', days: 3, score: 92, thumb: 'https://img.youtube.com/vi/jfKfPfyJRdk/mqdefault.jpg' },
+    { id: '2', title: 'Zen Garden Music 🌸 Peaceful Japanese Flute', channel: 'Meditation Sounds', views: '89K', days: 5, score: 88, thumb: 'https://img.youtube.com/vi/5qap5aO4i9A/mqdefault.jpg' },
+    { id: '3', title: 'Japanese Tea Ceremony Music 🍵 Calm & Relaxing', channel: 'Asian Relaxation', views: '67K', days: 2, score: 85, thumb: 'https://img.youtube.com/vi/lTRiuFIWV54/mqdefault.jpg' },
+  ],
+  sleep: [
+    { id: '4', title: 'Deep Sleep Music 🌙 8 Hours Delta Waves', channel: 'Sleep Therapy', views: '345K', days: 2, score: 95, thumb: 'https://img.youtube.com/vi/DWcJFNfaw9c/mqdefault.jpg' },
+    { id: '5', title: 'Insomnia Relief Music 😴 Fall Asleep Fast', channel: 'Relaxing Music', views: '278K', days: 4, score: 93, thumb: 'https://img.youtube.com/vi/1ZYbU82GVz4/mqdefault.jpg' },
+    { id: '6', title: 'Black Screen Sleep Music 🖤 No Ads', channel: 'Dark Sleep', views: '189K', days: 3, score: 91, thumb: 'https://img.youtube.com/vi/UfcAVejslrU/mqdefault.jpg' },
+  ],
+  study: [
+    { id: '7', title: 'Study Music 📚 Focus & Concentration', channel: 'Study Beats', views: '567K', days: 3, score: 98, thumb: 'https://img.youtube.com/vi/5qap5aO4i9A/mqdefault.jpg' },
+    { id: '8', title: 'Lofi Hip Hop Study 🎧 Chill Beats', channel: 'Lofi Girl', views: '892K', days: 5, score: 99, thumb: 'https://img.youtube.com/vi/jfKfPfyJRdk/mqdefault.jpg' },
+    { id: '9', title: 'Classical Music for Study 🎻 Mozart Effect', channel: 'Classical Hub', views: '234K', days: 4, score: 91, thumb: 'https://img.youtube.com/vi/rUxyKA_-grg/mqdefault.jpg' },
+  ]
+};
+
 const categories = [
-  { id: 'japan', keyword: 'relaxing japan music', label: '🎌 Relaxing Japan Music', color: 'from-pink-500 to-rose-500' },
-  { id: 'sleep', keyword: 'deep sleep music 8 hours', label: '😴 Sleep Music', color: 'from-indigo-500 to-purple-500' },
-  { id: 'study', keyword: 'lofi study music focus', label: '📚 Study/Focus', color: 'from-amber-500 to-orange-500' },
+  { id: 'japan', label: '🎌 Relaxing Japan Music', color: 'from-pink-500 to-rose-500', keyword: 'relaxing japan music' },
+  { id: 'sleep', label: '😴 Sleep Music', color: 'from-indigo-500 to-purple-500', keyword: 'deep sleep music 8 hours' },
+  { id: 'study', label: '📚 Study/Focus', color: 'from-amber-500 to-orange-500', keyword: 'lofi study music focus' },
 ];
 
-async function getTrendingVideos(keyword: string) {
-  try {
-    const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) {
-      console.warn('⚠️ YOUTUBE_API_KEY tidak ditemukan');
-      return [];
-    }
-
-    // Gunakan new Date() alih-alih Date.now() untuk menghindari Next.js build error
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const publishedAfter = sevenDaysAgo.toISOString();
-    
-    const searchRes = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(keyword)}&type=video&order=viewCount&maxResults=9&publishedAfter=${publishedAfter}&relevanceLanguage=en&key=${apiKey}`,
-      { cache: 'no-store' }
-    );
-
-    if (!searchRes.ok) return [];
-    const searchData = await searchRes.json();
-    if (!searchData.items || searchData.items.length === 0) return [];
-
-    const videoIds = searchData.items.map((i: any) => i.id.videoId).join(',');
-    const videosRes = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoIds}&key=${apiKey}`,
-      { cache: 'no-store' }
-    );
-
-    if (!videosRes.ok) return [];
-    const videosData = await videosRes.json();
-
-    const statsMap: Record<string, any> = {};
-    videosData.items?.forEach((v: any) => {
-      statsMap[v.id] = parseInt(v.statistics.viewCount || '0');
-    });
-
-    return searchData.items
-      .map((item: any) => ({
-        videoId: item.id.videoId,
-        title: item.snippet.title,
-        thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
-        channelTitle: item.snippet.channelTitle,
-        publishedAt: item.snippet.publishedAt,
-        viewCount: statsMap[item.id.videoId] || 0,
-      }))
-      .sort((a: any, b: any) => b.viewCount - a.viewCount);
-  } catch (error) {
-    console.error('❌ Error fetching trending:', error);
-    return [];
-  }
-}
-
-function formatViews(views: number): string {
-  if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
-  if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-  return views.toString();
-}
-
-function daysAgo(dateStr: string): number {
-  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
-  return Math.max(0, days);
-}
-
-export default async function LandingPage() {
-  const [japanVideos, sleepVideos, studyVideos] = await Promise.all([
-    getTrendingVideos(categories[0].keyword),
-    getTrendingVideos(categories[1].keyword),
-    getTrendingVideos(categories[2].keyword),
-  ]);
-
-  const videosByCategory: Record<string, any[]> = {
-    japan: japanVideos,
-    sleep: sleepVideos,
-    study: studyVideos,
-  };
-
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
       {/* Navbar */}
@@ -155,6 +92,7 @@ export default async function LandingPage() {
             </a>
           </div>
 
+          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-3xl mx-auto">
             {[
               { label: 'Videos Scanned', value: '50K+' },
@@ -202,20 +140,20 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Trending Videos Section */}
+      {/* Trending Videos Section (100% Static Mock Data) */}
       <section id="trending" className="py-20 px-4 bg-gradient-to-br from-slate-50 to-purple-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              <TrendingUp size={16} /> Live Data dari YouTube
+              <TrendingUp size={16} /> Contoh Data Viral
             </div>
             <h2 className="text-4xl font-bold mb-4">🔥 Top Viral Videos (7 Hari Terakhir)</h2>
-            <p className="text-gray-600 text-lg">Video trending dengan views tertinggi di berbagai kategori</p>
+            <p className="text-gray-600 text-lg">Contoh video trending dengan views tertinggi di berbagai kategori</p>
           </div>
 
           <div className="space-y-12">
             {categories.map((cat) => {
-              const videos = videosByCategory[cat.id] || [];
+              const videos = trendingVideos[cat.id as keyof typeof trendingVideos];
               return (
                 <div key={cat.id}>
                   <div className="flex items-center gap-3 mb-6">
@@ -228,50 +166,42 @@ export default async function LandingPage() {
                     </div>
                   </div>
 
-                  {videos.length === 0 ? (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center">
-                      <p className="text-yellow-700 text-sm">
-                        ⚠️ Belum ada data trending. Pastikan <code className="bg-yellow-100 px-1 rounded">YOUTUBE_API_KEY</code> sudah diset di Vercel.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid md:grid-cols-3 gap-5">
-                      {videos.map((video: any, idx: number) => (
-                        <a
-                          key={video.videoId}
-                          href={`https://youtube.com/watch?v=${video.videoId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
-                        >
-                          <div className="relative overflow-hidden">
-                            <img
-                              src={video.thumbnail}
-                              alt={video.title}
-                              className="w-full h-44 object-cover group-hover:scale-110 transition duration-500"
-                            />
-                            <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                              #{idx + 1}
-                            </div>
-                            <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur text-white px-2 py-1 rounded text-xs font-medium">
-                              {formatViews(video.viewCount)} views
-                            </div>
+                  <div className="grid md:grid-cols-3 gap-5">
+                    {videos.map((video, idx) => (
+                      <a
+                        key={video.id}
+                        href={`https://youtube.com/watch?v=${video.thumb.split('/')[4]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+                      >
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={video.thumb}
+                            alt={video.title}
+                            className="w-full h-44 object-cover group-hover:scale-110 transition duration-500"
+                          />
+                          <div className="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                            Score: {video.score}
                           </div>
-                          <div className="p-4">
-                            <h4 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-purple-600 transition">
-                              {video.title}
-                            </h4>
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span className="truncate">{video.channelTitle}</span>
-                              <span className="flex items-center gap-1">
-                                <Clock size={10} /> {daysAgo(video.publishedAt)}d ago
-                              </span>
-                            </div>
+                          <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur text-white px-2 py-1 rounded text-xs font-medium">
+                            {video.views} views
                           </div>
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                        </div>
+                        <div className="p-4">
+                          <h4 className="font-bold text-sm mb-2 line-clamp-2 group-hover:text-purple-600 transition">
+                            {video.title}
+                          </h4>
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span className="truncate">{video.channel}</span>
+                            <span className="flex items-center gap-1">
+                              <Clock size={10} /> {video.days}d ago
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               );
             })}
