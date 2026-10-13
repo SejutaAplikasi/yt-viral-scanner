@@ -150,7 +150,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> <strong>Thumbnail Color Decoder</strong></li>
                 <li className="flex items-center gap-2"><CheckCircle size={16} className="text-white" /> Prioritas Support</li>
               </ul>
-              <a href="https://lynk.id/username-anda" target="_blank" className="block w-full text-center bg-white text-purple-600 py-3 rounded-lg font-bold hover:scale-105 transition shadow-lg">
+              <a href="http://lynk.id/sejutaaplikasi/9k00qq2588n5" target="_blank" className="block w-full text-center bg-white text-purple-600 py-3 rounded-lg font-bold hover:scale-105 transition shadow-lg">
                 Beli Kode di Lynk.id
               </a>
             </div>
