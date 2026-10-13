@@ -76,7 +76,7 @@ export default function PremiumModal({ isOpen, onClose, onSuccess }: PremiumModa
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="CONTOH: VIRAL-2024-PRO"
+                placeholder="CONTOH: CODE-AKTIVASI-2026"
                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none font-mono uppercase tracking-wider"
                 required
               />
@@ -104,7 +104,7 @@ export default function PremiumModal({ isOpen, onClose, onSuccess }: PremiumModa
           </button>
 
           <p className="text-xs text-center text-gray-500">
-            Belum punya kode? <a href="https://lynk.id/username-anda" target="_blank" className="text-purple-600 font-bold hover:underline">Beli di Lynk.id (Rp 99rb)</a>
+            Belum punya kode? <a href="http://lynk.id/sejutaaplikasi/9k00qq2588n5" target="_blank" className="text-purple-600 font-bold hover:underline">Beli di Lynk.id (Rp 99rb)</a>
           </p>
         </form>
       </div>
